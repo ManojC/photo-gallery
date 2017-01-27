@@ -1,34 +1,115 @@
 <link rel="import" href="../polymer/polymer.html">
-
+<link rel="import" href="../neon-animation/neon-animated-pages.html">
+<link rel="import" href="../neon-animation/neon-animatable.html">
+<link rel="import" href="../neon-animation/neon-animations.html">
+<link rel="import" href="../paper-styles/color.html">
+<link rel="import" href="../paper-styles/typography.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../iron-a11y-keys/iron-a11y-keys.html">
 <!--
-`photo-gallery`
+`photo-gallery` 
 
 
 @demo demo/index.html 
 -->
-
 <dom-module id="photo-gallery">
-  <template>
-    <style>
-      :host {
-        display: block;
-      }
-    </style>
-    <h2>Hello [[prop1]]</h2>
-  </template>
+    <template>
+        <style>
+        :host {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .left-button,
+        .right-button {
+            position: absolute;
+            background: #ff0000;
+            z-index: 10;
+            height: 100%;
+            width: 10%;
+        }
+        
+        .right-button {
+            right: 0;
+        }
+        
+        .img-container {
+            width: 80%;
+            margin: auto;
+        }
+        
+        img {
+            width: 100%;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+        }
+        </style>
+        <iron-a11y-keys keys="left right" target="[[target]]" on-keys-pressed="_updatePressed"></iron-a11y-keys>
+        <span class="left-button" on-tap="_onPrevClick"></span>
+        <neon-animated-pages id="pages" selected="[[selected]]" entry-animation="[[entryAnimation]]" exit-animation="[[exitAnimation]]">
+            <template is="dom-repeat" items="[[images]]" as="image">
+                <neon-animatable>
+                    <div class="img-container">
+                        <img src="[[image]]" alt="[[image]]">
+                    </div>
+                </neon-animatable>
+            </template>
+        </neon-animated-pages>
+        <span class="right-button" on-tap="_onNextClick"></span>
+    </template>
+    <script>
+    (function() {
 
-  <script>
-    Polymer({
+        'use strict';
 
-      is: 'photo-gallery',
+        Polymer({
 
-      properties: {
-        prop1: {
-          type: String,
-          value: 'photo-gallery',
-        },
-      },
+            is: 'photo-gallery',
 
-    });
-  </script>
+            properties: {
+                selected: {
+                    type: Number,
+                    value: 0,
+                },
+
+                images: {
+                    type: Array,
+                    value: [
+                        'https://upload.wikimedia.org/wikipedia/commons/3/36/Hopetoun_falls.jpg',
+                        'http://www.planwallpaper.com/static/images/4-Nature-Wallpapers-2014-1_ukaavUI.jpg',
+                        'http://www.planwallpaper.com/static/images/nature-wallpapers-1.jpg',
+                        'http://www.wallpapereast.com/static/images/spring-in-nature-wide-wallpaper-603794.jpg',
+                        'https://static.pexels.com/photos/1029/landscape-mountains-nature-clouds.jpg'
+                    ],
+                },
+
+                target: {
+                    type: Object,
+                    value: function() {
+                        return document.body;
+                    }
+                }
+            },
+
+            _onPrevClick: function() {
+                this.entryAnimation = 'slide-from-left-animation';
+                this.exitAnimation = 'slide-right-animation';
+                this.selected = this.selected === 0 ? this.images.length - 1 : (this.selected - 1);
+            },
+
+            _onNextClick: function() {
+                this.entryAnimation = 'slide-from-right-animation';
+                this.exitAnimation = 'slide-left-animation';
+                this.selected = this.selected === this.images.length - 1 ? 0 : (this.selected + 1);
+            },
+
+            _updatePressed: function(event) {
+                event.detail.combo === 'left' ? this._onPrevClick() : this._onNextClick();
+            }
+        });
+    })();
+    </script>
 </dom-module>
